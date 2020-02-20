@@ -1,4 +1,4 @@
-# ggbet-parcer
+# ggbet-parser
 npm package for parsing bookmaker ggbet
 
 
