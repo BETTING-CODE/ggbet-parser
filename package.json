@@ -1,0 +1,28 @@
+{
+  "name": "ggbet-parser",
+  "version": "1.0.0",
+  "description": "npm package for parsing bookmaker ggbet",
+  "main": "index.js",
+  "scripts": {
+    "test": ""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/BETTING-CODE/ggbet-parser.git"
+  },
+  "author": "Edward Beton <twitter:https://twitter.com/edwardbeton/>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/BETTING-CODE/starcraft2-value-bet-generator/issues"
+  },
+  "homepage": "https://github.com/BETTING-CODE/starcraft2-value-bet-generator#readme",
+  "keywords": [
+    "ggbet",
+    "parser",
+    "scraping",
+    "betting"
+  ],
+  "dependencies": {
+    "puppeteer": "^2.1.1"
+  }
+}
