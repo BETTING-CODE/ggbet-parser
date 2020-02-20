@@ -1,8 +1,13 @@
 # ggbet-parser
 npm package for parsing bookmaker ggbet
 
+# how to install
 
-# how use
+```
+npm install --save ggbet-parser
+```
+
+# how to use
 
 Example code
 
