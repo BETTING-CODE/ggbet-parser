@@ -1,6 +1,5 @@
 
 const puppeteer = require('puppeteer')
-const urlggbet = 'https://gg22.bet/en'
 
 function getMatches(page) {
     return new Promise(async resolve => {
@@ -85,10 +84,10 @@ list of naming discipline in ggbet
 
 */
 
-async function getLine(discipline = 'starcraft2') {
+async function getLine(discipline = 'starcraft2', urlGGbet = 'https://gg23.bet/en') {
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
-    const url = `${urlggbet}/${discipline}`
+    const url = `${urlGGbet}/${discipline}`
 
     await page.goto(url, { waitUntil: 'domcontentloaded' })
 

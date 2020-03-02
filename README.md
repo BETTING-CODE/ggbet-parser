@@ -17,4 +17,6 @@ const ggbetParser = require('ggbet-parser')
 
 ggbetParser.getLine('starcraft2')
 
+ggbetParser.getLine('starcraft2', 'https://gg23.bet/en')
+
 ```

@@ -1,6 +1,6 @@
 {
   "name": "ggbet-parser",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "npm package for parsing bookmaker ggbet",
   "main": "index.js",
   "scripts": {
