@@ -84,10 +84,36 @@ list of naming discipline in ggbet
 
 */
 
-async function getLine(discipline = 'starcraft2', urlGGbet = 'https://gg23.bet/en') {
+function generateDateFromUrl(dateFrom, dateTo) {
+    if (dateFrom == null && dateTo == null) {
+        return ''
+    } else {
+        //date format - YYYY-MM-DD
+        let dateFromUrlString = ''
+        if (dateFrom != null) {
+            dateFrom = new Date(dateFrom)
+            const M = (dateFrom.getMonth() + 1).toString().padStart(2,'0')
+            const D = dateFrom.getDate().toString().padStart(2,'0')
+            const Y = dateFrom.getFullYear()
+            dateFromUrlString += `&dateFrom=${Y}-${M}-${D}`
+        }
+
+        if (dateTo != null) {
+            dateTo = new Date(dateTo)
+            const M = (dateTo.getMonth() + 1).toString().padStart(2,'0')
+            const D = dateTo.getDate().toString().padStart(2,'0')
+            const Y = dateTo.getFullYear()
+            dateFromUrlString += `&dateTo=${Y}-${M}-${D}`
+        }
+        return dateFromUrlString
+    }
+}
+
+async function getLine(discipline = 'starcraft2', urlGGbet = 'https://gg23.bet/en', urlPage = 1, dateFrom = null, dateTo = null) {
     const browser = await puppeteer.launch()
     const page = await browser.newPage()
-    const url = `${urlGGbet}/${discipline}`
+
+    const url = `${urlGGbet}/${discipline}?page=${urlPage}${generateDateFromUrl(dateFrom,dateTo)}`
 
     await page.goto(url, { waitUntil: 'domcontentloaded' })
 
