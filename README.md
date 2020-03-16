@@ -1,22 +1,39 @@
 # ggbet-parser
 npm package for parsing bookmaker ggbet
 
-# how to install
+## how to install
 
-```
+```shell script
 npm install --save ggbet-parser
 ```
 
-# how to use
+## how to use
 
-Example code
+###Simple Example code
 
+```javascript
+const ggBetParser = require('ggbet-parser')
+
+ggBetParser.getLine('starcraft2')
+
+ggBetParser.getLine('starcraft2', {
+  mirrorUrl: 'https://gg23.bet/en', 
+  pageUrl: 2, 
+  dateFrom: Date.now(),
+  dateTo: Date.now() + 24 * 60 * 60 * 1000, 
+})
 ```
 
-const ggbetParser = require('ggbet-parser')
+### Parse until the data exist
 
-ggbetParser.getLine('starcraft2')
+```javascript
+const ggBetParser = require('ggbet-parser')
 
-ggbetParser.getLine('starcraft2', 'https://gg23.bet/en')
+const allMatches = {}
+const options = { dateFrom: Date.now(), dateTo: Date.now() + 7 * 24 * 60 * 60 * 1000 } // for one week
 
+for await (const matches of ggBetParser.getLine('starcraft2', options) {
+  Object.assign(allMatches, matches)
+}
 ```
+
