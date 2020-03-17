@@ -82,6 +82,15 @@ list of naming discipline in ggbet
 
 */
 
+async function createBrowserAndPage () {
+  const browser = await puppeteer.launch({ headless: true })
+  const page = await browser.newPage()
+  await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36')
+  await page.setViewport({ width: 1920, height: 1080 })
+
+  return { browser, page }
+}
+
 function generateUrl (baseUrl, discipline, { urlPage, dateFrom, dateTo } = {}) {
   return `${baseUrl}/en/${discipline}?page=${urlPage}${generateDateFromUrl(dateFrom, dateTo)}`
 }
@@ -131,8 +140,7 @@ async function getLine (discipline, {
     throw new Error('No discipline provided')
   }
 
-  const browser = await puppeteer.launch()
-  const page = await browser.newPage()
+  const { browser, page } = await createBrowserAndPage()
 
   const url = generateUrl(mirrorUrl, discipline, { urlPage, dateFrom, dateTo })
 
@@ -165,10 +173,7 @@ async function * getLineUntilDataExist (discipline, {
     throw new Error('No discipline provided')
   }
 
-  const browser = await puppeteer.launch({ headless: true })
-  const page = await browser.newPage()
-  await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36')
-  await page.setViewport({ width: 1920, height: 1080 })
+  const { browser, page } = await createBrowserAndPage()
 
   fromPage = fromPage - 1
 
