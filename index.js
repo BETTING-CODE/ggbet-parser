@@ -53,8 +53,8 @@ async function getMatches (browserPage) {
 
         resolve(result)
       }
-    } catch (e) {
-      resolve({ error: e })
+    } catch (error) {
+      resolve({ error })
     }
   }
 
@@ -165,8 +165,10 @@ async function * getLineUntilDataExist (discipline, {
     throw new Error('No discipline provided')
   }
 
-  const browser = await puppeteer.launch()
+  const browser = await puppeteer.launch({ headless: true })
   const page = await browser.newPage()
+  await page.setUserAgent('Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/79.0.3945.117 Safari/537.36')
+  await page.setViewport({ width: 1920, height: 1080 })
 
   fromPage = fromPage - 1
 
@@ -178,7 +180,7 @@ async function * getLineUntilDataExist (discipline, {
 
       const matches = await getMatches(page)
 
-      if (Object.keys(matches).length === 0) {
+      if (!matches || Object.keys(matches).length === 0 || matches.error) {
         break
       } else {
         yield matches
