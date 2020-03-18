@@ -17,7 +17,7 @@ const ggBetParser = require('ggbet-parser')
 ggBetParser.getLine('starcraft2')
 
 ggBetParser.getLine('starcraft2', {
-  mirrorUrl: 'https://gg23.bet/en', 
+  mirrorUrl: 'https://gg23.bet', 
   pageUrl: 2, 
   dateFrom: Date.now(),
   dateTo: Date.now() + 24 * 60 * 60 * 1000, 
