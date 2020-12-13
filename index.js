@@ -34,7 +34,8 @@ async function getMatches (browserPage) {
               let bo = ''
               markets.map(market => {
                 if (typeof market.specifiers !== 'undefined' && market.specifiers.length > 0) {
-                  bo = market.specifiers[0].value
+                  const {value: bestOf } = market.specifiers.find(spec => spec.name == 'bo')
+                  bo = bestOf
                 }
               })
 
