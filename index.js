@@ -16,8 +16,10 @@ async function getMatches (browserPage) {
             const mapHandicapMarket = match.markets.find(market => /^map handicap$/i.test(market.name))
 
             if (winnerMarket) {
+              console.log(JSON.stringify(match, null, 2))
               const { id, fixture } = match
               const { competitors, score, status, startTime, tournament } = fixture
+              const { markets } = match
 
               if (result[id] !== undefined) {
                 resolve(result)
@@ -29,6 +31,12 @@ async function getMatches (browserPage) {
               const { name: away } = competitors.find(cmp => /away/i.test(cmp.homeAway))
               const { value: homeOdd } = winnerMarket.odds.find(odd => odd.name === home)
               const { value: awayOdd } = winnerMarket.odds.find(odd => odd.name === away)
+              let bo = ''
+              markets.map(market => {
+                if (typeof market.specifiers !== 'undefined' && market.specifiers.length > 0) {
+                  bo = market.specifiers[0].value
+                }
+              })
 
               result[id] = {
                 id,
@@ -41,19 +49,23 @@ async function getMatches (browserPage) {
                 homeOdd,
                 awayOdd,
                 tournamentName,
-                tournamentId
+                tournamentId,
+                bo
               }
 
               if (mapHandicapMarket) {
                 result[id].handicapOdds = mapHandicapMarket.odds
               }
             }
-          } catch (e) { }
+          } catch (e) {
+            console.log(e)
+          }
         }
 
         resolve(result)
       }
     } catch (error) {
+      console.log(error)
       resolve({ error })
     }
   }
