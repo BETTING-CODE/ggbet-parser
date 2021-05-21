@@ -1,11 +1,11 @@
-const ggbetURL = 'https://gg94.bet'
+const ggbetURL = 'https://ggbetily.com'
 const ggbetParser = require('./index.js')
 
-const ggbetLine = ggbetParser.getLine('starcraft2', {
-    mirrorUrl : ggbetURL
+ggbetParser.getLine('starcraft2', {
+  mirrorUrl: ggbetURL
 })
-.then(data => {
+  .then(data => {
     console.log('###########')
     console.log(data)
-})
-.catch(e => console.log(e))
+  })
+  .catch(e => console.log(e))

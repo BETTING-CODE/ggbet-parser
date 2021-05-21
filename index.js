@@ -1,9 +1,16 @@
 const puppeteer = require('puppeteer')
 
-async function getMatches (browserPage) {
+async function getMatches (browserPage, timeout) {
   const result = {}
 
-  const handleWebSocketFrameReceived = (params, resolve) => {
+  let debounceTimeoutId = null
+
+  const handleWebSocketFrameReceived = async (params, resolve) => {
+    const debounceResolve = () => {
+      clearTimeout(debounceTimeoutId)
+      debounceTimeoutId = setTimeout(() => resolve(result), 1000)
+    }
+
     try {
       const data = JSON.parse(params.response.payloadData)
 
@@ -15,29 +22,36 @@ async function getMatches (browserPage) {
             const winnerMarket = match.markets.find(market => /^winner$/i.test(market.name))
             const mapHandicapMarket = match.markets.find(market => /^map handicap$/i.test(market.name))
 
-            if (winnerMarket) {
-              console.log(JSON.stringify(match, null, 2))
+            if (winnerMarket || mapHandicapMarket) {
               const { id, fixture } = match
               const { competitors, score, status, startTime, tournament } = fixture
               const { markets } = match
 
               if (result[id] !== undefined) {
-                resolve(result)
-                break
+                const sameMarketsAsWas = !winnerMarket ^ !result[id].homeOdd && !mapHandicapMarket ^ !result[id].handicapOdds
+                const alreadyFulfilled = result[id].homeOdd && result[id].handicapOdds
+
+                if (sameMarketsAsWas || alreadyFulfilled) {
+                  debounceResolve()
+                  break
+                }
               }
 
               const { name: tournamentName, id: tournamentId } = tournament
               const { name: home } = competitors.find(cmp => /home/i.test(cmp.homeAway))
               const { name: away } = competitors.find(cmp => /away/i.test(cmp.homeAway))
-              const { value: homeOdd } = winnerMarket.odds.find(odd => odd.name === home)
-              const { value: awayOdd } = winnerMarket.odds.find(odd => odd.name === away)
+
               let bo = ''
-              markets.map(market => {
-                if (typeof market.specifiers !== 'undefined' && market.specifiers.length > 0) {
-                  const {value: bestOf } = market.specifiers.find(spec => spec.name == 'bo')
-                  bo = bestOf
+
+              // console.log(markets.map(m => Array.isArray(m.specifiers) ? m.specifiers : []).flat())
+
+              for (const market of markets) {
+                if (Array.isArray(market.specifiers)) {
+                  const { value: bestOf } = market.specifiers.find(spec => spec.name === 'bo') || {}
+
+                  bo = bestOf || ''
                 }
-              })
+              }
 
               result[id] = {
                 id,
@@ -47,11 +61,17 @@ async function getMatches (browserPage) {
                 startTime: +new Date(startTime),
                 home,
                 away,
-                homeOdd,
-                awayOdd,
                 tournamentName,
                 tournamentId,
                 bo
+              }
+
+              if (winnerMarket) {
+                const { value: homeOdd } = winnerMarket.odds.find(odd => odd.name === home)
+                const { value: awayOdd } = winnerMarket.odds.find(odd => odd.name === away)
+
+                result[id].homeOdd = homeOdd
+                result[id].awayOdd = awayOdd
               }
 
               if (mapHandicapMarket) {
@@ -63,21 +83,30 @@ async function getMatches (browserPage) {
           }
         }
 
-        resolve(result)
+        debounceResolve()
       }
     } catch (error) {
-      console.log(error)
-      resolve({ error })
+      // console.log(e)
     }
   }
-
   const f12 = await browserPage.target().createCDPSession()
   await f12.send('Network.enable')
   await f12.send('Page.enable')
 
-  return new Promise(resolve => {
-    f12.on('Network.webSocketFrameReceived', params => handleWebSocketFrameReceived(params, resolve))
-  })
+  let timeoutId
+
+  await Promise.race([
+    new Promise(resolve => {
+      f12.on('Network.webSocketFrameReceived', params => handleWebSocketFrameReceived(params, resolve))
+    }),
+    new Promise(resolve => {
+      timeoutId = setTimeout(resolve, timeout)
+    })
+  ])
+
+  clearTimeout(timeoutId)
+
+  return result
 }
 
 /*
@@ -147,7 +176,8 @@ async function getLine (discipline, {
   mirrorUrl = 'https://ggbet.com',
   urlPage = 1,
   dateFrom = null,
-  dateTo = null
+  dateTo = null,
+  timeout = 5000
 } = {}) {
   if (!discipline) {
     throw new Error('No discipline provided')
@@ -159,7 +189,7 @@ async function getLine (discipline, {
 
   await page.goto(url, { waitUntil: 'domcontentloaded' })
 
-  const matches = await getMatches(page)
+  const matches = await getMatches(page, timeout)
 
   await page.close()
   await browser.close()
@@ -180,7 +210,8 @@ async function * getLineUntilDataExist (discipline, {
   mirrorUrl = 'https://ggbet.com',
   fromPage = 1,
   dateFrom = null,
-  dateTo = null
+  dateTo = null,
+  chunkTimeout = 5000
 } = {}) {
   if (!discipline) {
     throw new Error('No discipline provided')
@@ -196,7 +227,7 @@ async function * getLineUntilDataExist (discipline, {
 
       await page.goto(url, { waitUntil: 'domcontentloaded' })
 
-      const matches = await getMatches(page)
+      const matches = await getMatches(page, chunkTimeout)
 
       if (!matches || Object.keys(matches).length === 0 || matches.error) {
         break
